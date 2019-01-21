@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "EInkDisplay"
+		}
+	],
+	"settings": {
+		"azure-iot-edge.defaultPlatform": {
+			"platform": "amd64",
+			"alias": null
+		},
+		"python.pythonPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Anaconda3_64\\python.exe"
+	}
+}

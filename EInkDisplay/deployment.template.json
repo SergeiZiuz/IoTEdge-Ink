@@ -14,6 +14,11 @@
                 "username": "$CONTAINER_REGISTRY_USERNAME_docker",
                 "password": "$CONTAINER_REGISTRY_PASSWORD_docker",
                 "address": "docker.io"
+              },
+              "smarthive": {
+                "username": "$CONTAINER_REGISTRY_USERNAME_smarthive",
+                "password": "$CONTAINER_REGISTRY_PASSWORD_smarthive",
+                "address": "smarthive.azurecr.io"
               }
             }
           }
@@ -57,23 +62,23 @@
           }
         },
         "modules": {
-          "tempSensor": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
-              "createOptions": {}
-            }
-          },
           "eInkDisplay": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.eInkDisplay}",
+              "image": "${MODULES.eInkDisplay.arm32v7}",
+              "createOptions": {}
+            }
+          },
+          "SmartHiveConnection": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.SmartHiveConnection.arm32v7}",
               "createOptions": {}
             }
           }
@@ -84,13 +89,33 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "eInkDisplayToIoTHub": "FROM /messages/modules/eInkDisplay/outputs/* INTO $upstream",
-          "sensorToeInkDisplay": "FROM /messages/modules/tempSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/eInkDisplay/inputs/input1\")"
+          "SbToeInkSchedule": "FROM /messages/modules/SmartHiveConnection/outputs/ScheduleOutput INTO BrokeredEndpoint(\"/modules/eInkDisplay/inputs/ScheduleInput\")",                    
+          "sbToeInkSensors": "FROM /messages/modules/SmartHiveConnection/outputs/SensorsOutput INTO BrokeredEndpoint(\"/modules/eInkDisplay/inputs/SensorsInput\")",
+          "eInkDisplayToIoTHub": "FROM /messages/modules/eInkDisplay/outputs/* INTO $upstream"
+          
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
       }
+    },
+    "eInkDisplay":{
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "Title":"Александровский сад",
+        "IconTopUrl": "",
+        "IconBottomUrl": "",
+        "VideoUrl": ""
+      }
+    },
+    "SmartHiveConnection":{
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "Transport": "ServiceBus",
+        "ConnectionString":"$SERVICEBUS_CONNECTION_STRING",
+        "Topic": "$SERVICEBUS_TOPIC_NAME",
+        "Subscription": "$SERVICEBUS_SUBSCRIPTION_NAME"
     }
+  }
   }
 }
