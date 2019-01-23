@@ -15,7 +15,7 @@ namespace SmartHiveConnection
     class Program
     {        
         public const string ScheduleOutputName = "ScheduleOutput";
-        public const string SensorsOutputName = "SensorsOutputInput";
+        public const string SensorsOutputName = "SensorsOutput";
 
         private static ServiceBusClient serviceBusClient = null;
 

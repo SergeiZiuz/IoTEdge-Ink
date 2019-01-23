@@ -74,10 +74,10 @@ class HubManager(object):
         self.client.set_option("messageTimeout", MESSAGE_TIMEOUT)
         
         # sets the callback when a message arrives on "ScheduleOutput" queue.  
-        self.client.set_message_callback("ScheduleOutput", receive_schedule_message_callback, self)
+        self.client.set_message_callback("ScheduleInput", receive_schedule_message_callback, self)
 
         # sets the callback when a message arrives on "SensorsOutputInput" queue.  
-        self.client.set_message_callback("SensorsOutputInput", receive_sensor_notification_callback, self)
+        self.client.set_message_callback("SensorsInput", receive_sensor_notification_callback, self)
 
 
     # Forwards the message received onto the next stage in the process.
