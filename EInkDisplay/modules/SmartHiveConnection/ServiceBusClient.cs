@@ -49,7 +49,8 @@ namespace SmartHiveConnection
 
                     // Register the function that will process messages
                     ServiceBusClient.subscriptionClient.RegisterMessageHandler(ServiceBusClient.ProcessMessagesAsync, messageHandlerOptions);
-                                        
+                    ServiceBusClient.ioTHubModuleClient = ioTHubModuleClient;           
+                    
                     await gateway.Start();
                                        
                     return gateway;
