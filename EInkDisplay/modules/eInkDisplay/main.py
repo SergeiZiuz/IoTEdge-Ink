@@ -6,6 +6,7 @@ import random
 import time
 import sys
 import iothub_client
+import json
 # pylint: disable=E0611
 from iothub_client import IoTHubModuleClient, IoTHubClientError, IoTHubTransportProvider
 from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError
@@ -33,20 +34,30 @@ def send_confirmation_callback(message, result, user_context):
     print ( "    Total calls confirmed: %d" % SEND_CALLBACKS )
 
 
-# receive_message_callback is invoked when an incoming message arrives on the specified 
-# input queue (in the case of this sample, "input1").  Because this is a filter module, 
-# we will forward this message onto the "output1" queue.
-def receive_message_callback(message, hubManager):
+# receive_schedule_message_callback is invoked when message with room schedule data arrives
+def receive_schedule_message_callback(message, hubManager):
     global RECEIVE_CALLBACKS
     message_buffer = message.get_bytearray()
     size = len(message_buffer)
-    print ( "    Data: <<<%s>>> & Size=%d" % (message_buffer[:size].decode('utf-8'), size) )
-    map_properties = message.properties()
-    key_value_pair = map_properties.get_internals()
-    print ( "    Properties: %s" % key_value_pair )
-    RECEIVE_CALLBACKS += 1
-    print ( "    Total calls received: %d" % RECEIVE_CALLBACKS )
-    hubManager.forward_event_to_output("output1", message, 0)
+    message_text = message_buffer[:size].decode('utf-8'), size)
+    print ( "    Data: <<<%s>>> & Size=%d" % (message_text)
+    
+       room_schedule = json.loads(message_text)
+
+    return IoTHubMessageDispositionResult.ACCEPTED
+
+
+
+# receive_sensor_notification_callback is invoked when message with updated room sensors data arrives
+def receive_sensor_notification_callback(message, hubManager):
+    global RECEIVE_CALLBACKS
+    message_buffer = message.get_bytearray()
+    size = len(message_buffer)
+    message_text = message_buffer[:size].decode('utf-8'), size)
+    print ( "    Data: <<<%s>>> & Size=%d" % (message_text)
+    
+       room_sensors_data = json.loads(message_text)
+
     return IoTHubMessageDispositionResult.ACCEPTED
 
 
@@ -62,9 +73,12 @@ class HubManager(object):
         # set the time until a message times out
         self.client.set_option("messageTimeout", MESSAGE_TIMEOUT)
         
-        # sets the callback when a message arrives on "input1" queue.  Messages sent to 
-        # other inputs or to the default will be silently discarded.
-        self.client.set_message_callback("input1", receive_message_callback, self)
+        # sets the callback when a message arrives on "ScheduleOutput" queue.  
+        self.client.set_message_callback("ScheduleOutput", receive_schedule_message_callback, self)
+
+        # sets the callback when a message arrives on "SensorsOutputInput" queue.  
+        self.client.set_message_callback("SensorsOutputInput", receive_sensor_notification_callback, self)
+
 
     # Forwards the message received onto the next stage in the process.
     def forward_event_to_output(self, outputQueueName, event, send_context):
