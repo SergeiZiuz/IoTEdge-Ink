@@ -7,6 +7,7 @@ using System;
     using IoT = Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Shared;
     using Newtonsoft.Json;
+    using SmartHive.Common.Data;
 
 namespace SmartHiveConnection
 {    
@@ -73,9 +74,29 @@ namespace SmartHiveConnection
 
             static async Task ProcessMessagesAsync(Message message, CancellationToken token)
             {
-                // Process the message
-                Console.WriteLine($"Received message: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{Encoding.UTF8.GetString(message.Body)}");
-                
+                string msgBody = Encoding.UTF8.GetString(message.Body);
+                if (string.IsNullOrEmpty(msgBody)){
+                    throw new ArgumentNullException("Message body is null or empty");
+                }
+               
+
+                    byte[] messageBytes = Encoding.ASCII.GetBytes(msgBody);
+                    IoT.Message  pipeMessage =  new IoT.Message(messageBytes);
+                //  Check if this is a schedule notification
+                if (ScheduleUpdateEventSchema.IsValid(msgBody)){
+                    await ioTHubModuleClient.SendEventAsync("ScheduleOutput", pipeMessage);
+                    Console.WriteLine($"Sucessfull handling ScheduleOutput message");
+                 // Check if this is sensort notification
+                }else if (NotificationEventSchema.IsValid(msgBody))
+                {                    
+                    await ioTHubModuleClient.SendEventAsync("SensorsOutput", pipeMessage);
+                    Console.WriteLine($"Sucessfull handling SensorsOutput message");
+                }else{
+                     // Process the message
+                    Console.WriteLine($"Unknown message format: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{msgBody}");
+                    throw new ArgumentException("Unknown message format");
+                }
+
                 // Complete the message so that it is not received again.
                 // This can be done only if the subscriptionClient is opened in ReceiveMode.PeekLock mode (which is default).
                 await subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
