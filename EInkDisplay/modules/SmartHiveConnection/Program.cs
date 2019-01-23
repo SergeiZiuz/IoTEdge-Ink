@@ -9,15 +9,24 @@ namespace SmartHiveConnection
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client;
+    using Microsoft.Azure.Devices.Shared;
     using Microsoft.Azure.Devices.Client.Transport.Mqtt;
 
     class Program
-    {
-        static int counter;
+    {        
+        public const string ScheduleOutputName = "ScheduleOutput";
+        public const string SensorsOutputName = "SensorsOutputInput";
+
+        private static ServiceBusClient serviceBusClient = null;
 
         static void Main(string[] args)
         {
-            Init().Wait();
+            #if IOT_EDGE
+            // Install CA certificate
+                InstallCert();
+            #endif
+
+             InitEdgeModule().Wait();
 
             // Wait until the app unloads or is cancelled
             var cts = new CancellationTokenSource();
@@ -37,10 +46,41 @@ namespace SmartHiveConnection
         }
 
         /// <summary>
+        /// Add certificate in local cert store for use by client for secure connection to IoT Edge runtime
+        /// </summary>
+        static void InstallCert()
+        {
+            // Suppress cert validation on Windows for now
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            string certPath = Environment.GetEnvironmentVariable("EdgeModuleCACertificateFile");
+            if (string.IsNullOrWhiteSpace(certPath))
+            {
+                // We cannot proceed further without a proper cert file
+                Console.WriteLine("Missing path to certificate collection file.");
+                throw new InvalidOperationException("Missing path to certificate file.");
+            }
+            else if (!File.Exists(certPath))
+            {
+                // We cannot proceed further without a proper cert file
+                Console.WriteLine("Missing certificate collection file.");
+                throw new InvalidOperationException("Missing certificate file.");
+            }
+            X509Store store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadWrite);
+            store.Add(new X509Certificate2(X509Certificate2.CreateFromCertFile(certPath)));
+            Console.WriteLine("Added Cert: " + certPath);
+            store.Close();
+        }
+
+        /// <summary>
         /// Initializes the ModuleClient and sets up the callback to receive
         /// messages containing temperature information
         /// </summary>
-        static async Task Init()
+        static async Task  InitEdgeModule()
         {
             MqttTransportSettings mqttSetting = new MqttTransportSettings(TransportType.Mqtt_Tcp_Only);
             ITransportSettings[] settings = { mqttSetting };
@@ -50,40 +90,42 @@ namespace SmartHiveConnection
             await ioTHubModuleClient.OpenAsync();
             Console.WriteLine("IoT Hub module client initialized.");
 
-            // Register callback to be called when a message is received by the module
-            await ioTHubModuleClient.SetInputMessageHandlerAsync("input1", PipeMessage, ioTHubModuleClient);
+            // Read Module Twin Desired Properties
+            Console.WriteLine("Reading module Twin from IoT Hub.");
+            var moduleTwin = await ioTHubModuleClient.GetTwinAsync();
+
+            // Parse Twin Json and initialize gateway       
+            Console.WriteLine("Starting Gateway controller handler process.");
+            ServiceBusClientModel gatewayConfigModel = ServiceBusClientModel.InitClientModel(moduleTwin.Properties.Desired);
+            
+            serviceBusClient = await ServiceBusClient.Init(gatewayConfigModel, ioTHubModuleClient);
+            var userContext = new Tuple<ServiceBusClient>( serviceBusClient);
+
+             // Attach callback for Twin desired properties updates
+            await ioTHubModuleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertiesUpdate, userContext);
+            
+           
         }
 
+      
+
         /// <summary>
-        /// This method is called whenever the module is sent a message from the EdgeHub. 
-        /// It just pipe the messages without any change.
-        /// It prints all the incoming messages.
+        /// Callback to handle Twin desired properties updates�
         /// </summary>
-        static async Task<MessageResponse> PipeMessage(Message message, object userContext)
+        static async Task OnDesiredPropertiesUpdate(TwinCollection desiredProperties, object userContext)
         {
-            int counterValue = Interlocked.Increment(ref counter);
-
-            var moduleClient = userContext as ModuleClient;
-            if (moduleClient == null)
+            var userContextValues  = userContext as Tuple<ServiceBusClient>;
+            if (userContextValues == null)
             {
-                throw new InvalidOperationException("UserContext doesn't contain " + "expected values");
+                throw new InvalidOperationException("UserContext doesn't contain expected values");
             }
+                
+                ServiceBusClient serviceBusClient = userContextValues.Item1;
+                ModuleClient ioTHubModuleClient = ServiceBusClient.ioTHubModuleClient;
+                await serviceBusClient.Stop();
+                ServiceBusClientModel gatewayConfigModel = ServiceBusClientModel.InitClientModel(desiredProperties);
+                serviceBusClient = await ServiceBusClient.Init(gatewayConfigModel, ioTHubModuleClient);
 
-            byte[] messageBytes = message.GetBytes();
-            string messageString = Encoding.UTF8.GetString(messageBytes);
-            Console.WriteLine($"Received message: {counterValue}, Body: [{messageString}]");
-
-            if (!string.IsNullOrEmpty(messageString))
-            {
-                var pipeMessage = new Message(messageBytes);
-                foreach (var prop in message.Properties)
-                {
-                    pipeMessage.Properties.Add(prop.Key, prop.Value);
-                }
-                await moduleClient.SendEventAsync("output1", pipeMessage);
-                Console.WriteLine("Received message sent");
-            }
-            return MessageResponse.Completed;
         }
     }
 }
