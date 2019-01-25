@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for
 # full license information.
 
-import epd7in5
+#import epd7in5
 import random
 import time
 import sys
@@ -17,16 +17,12 @@ from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubE
 # By default, messages do not expire.
 MESSAGE_TIMEOUT = 10000
 
-# global counters
-RECEIVE_CALLBACKS = 0
-SEND_CALLBACKS = 0
-
-# Choose HTTP, AMQP or MQTT as transport protocol.  Currently only MQTT is supported.
+# Choose HTTP, AMQP or  as transport protocol.  Currently only MQTT is supported.
 PROTOCOL = IoTHubTransportProvider.MQTT
 
 # Callback received when the message that we're forwarding is processed.
 def send_confirmation_callback(message, result, user_context):
-    global SEND_CALLBACKS
+    
     print ( "Confirmation[%d] received for message with result = %s" % (user_context, result) )
     map_properties = message.properties()
     key_value_pair = map_properties.get_internals()
@@ -37,29 +33,25 @@ def send_confirmation_callback(message, result, user_context):
 
 # receive_schedule_message_callback is invoked when message with room schedule data arrives
 def receive_schedule_message_callback(message, hubManager):
-    global RECEIVE_CALLBACKS
-    message_buffer = message.get_bytearray()
-    size = len(message_buffer)
-    message_text = message_buffer[:size].decode('utf-8'), size)
-    print ( "    Data: <<<%s>>> & Size=%d" % (message_text)
     
-       room_schedule = json.loads(message_text)
+    try:
+        message_buffer = message.get_bytearray()
+        size = len(message_buffer)
+        message_text = message_buffer[:size].decode('utf-8')
 
-    return IoTHubMessageDispositionResult.ACCEPTED
+        room_schedule = json.loads(message_text)        
+
+        engagements_cnt = len(room_schedule["Schedule"])
+        print ( "%d engagements in the room <<<%s>>>\n" % (engagements_cnt, room_schedule["RoomId"]) )
+        
+        return IoTHubMessageDispositionResult.ACCEPTED
+
+    except Exception as err:
+        print("Error parsing json string %s\n" % err)
+        print ( "<<<%s>>> & Size=%d\n" % (message_text, size) )
+        
 
 
-
-# receive_sensor_notification_callback is invoked when message with updated room sensors data arrives
-def receive_sensor_notification_callback(message, hubManager):
-    global RECEIVE_CALLBACKS
-    message_buffer = message.get_bytearray()
-    size = len(message_buffer)
-    message_text = message_buffer[:size].decode('utf-8'), size)
-    print ( "    Data: <<<%s>>> & Size=%d" % (message_text)
-    
-       room_sensors_data = json.loads(message_text)
-
-    return IoTHubMessageDispositionResult.ACCEPTED
 
 
 class HubManager(object):
@@ -76,15 +68,15 @@ class HubManager(object):
         
         # sets the callback when a message arrives on "ScheduleOutput" queue.  
         self.client.set_message_callback("ScheduleInput", receive_schedule_message_callback, self)
-
+        
         # sets the callback when a message arrives on "SensorsOutputInput" queue.  
-        self.client.set_message_callback("SensorsInput", receive_sensor_notification_callback, self)
+        #self.client.set_message_callback("SensorsInput", receive_sensor_notification_callback, self)
 
 
     # Forwards the message received onto the next stage in the process.
-    def forward_event_to_output(self, outputQueueName, event, send_context):
-        self.client.send_event_async(
-            outputQueueName, event, send_confirmation_callback, send_context)
+    #def forward_event_to_output(self, outputQueueName, event, send_context):
+     #   self.client.send_event_async(
+     #       outputQueueName, event, send_confirmation_callback, send_context)
 
 def main(protocol):
     try:
@@ -93,8 +85,8 @@ def main(protocol):
 
         hub_manager = HubManager(protocol)
 
-        print ( "Starting the IoT Hub Python sample using protocol %s..." % hub_manager.client_protocol )
-        print ( "The sample is now waiting for messages and will indefinitely.  Press Ctrl-C to exit. ")
+        print ( "Starting the IoT Hub connection using protocol %s..." % hub_manager.client_protocol )
+        print ( "Listening incomming room messages.  Press Ctrl-C to exit. ")
 
         while True:
             time.sleep(1)

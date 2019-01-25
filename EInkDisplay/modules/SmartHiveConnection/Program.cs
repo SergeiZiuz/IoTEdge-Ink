@@ -11,6 +11,7 @@ namespace SmartHiveConnection
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Shared;
     using Microsoft.Azure.Devices.Client.Transport.Mqtt;
+   
 
     class Program
     {        
@@ -84,6 +85,8 @@ namespace SmartHiveConnection
         {
             MqttTransportSettings mqttSetting = new MqttTransportSettings(TransportType.Mqtt_Tcp_Only);
             ITransportSettings[] settings = { mqttSetting };
+           /*  AmqpTransportSettings amqpSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only);
+            ITransportSettings[] settings = { amqpSetting };*/
 
             // Open a connection to the Edge runtime
             ModuleClient ioTHubModuleClient = await ModuleClient.CreateFromEnvironmentAsync(settings);
@@ -98,13 +101,12 @@ namespace SmartHiveConnection
             Console.WriteLine("Starting Gateway controller handler process.");
             ServiceBusClientModel gatewayConfigModel = ServiceBusClientModel.InitClientModel(moduleTwin.Properties.Desired);
             
-            serviceBusClient = await ServiceBusClient.Init(gatewayConfigModel, ioTHubModuleClient);
-            var userContext = new Tuple<ServiceBusClient>( serviceBusClient);
+            serviceBusClient = ServiceBusClient.Init(gatewayConfigModel, ioTHubModuleClient);
+            
 
              // Attach callback for Twin desired properties updates
-            await ioTHubModuleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertiesUpdate, userContext);
-            
-           
+            await ioTHubModuleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertiesUpdate,null);
+                       
         }
 
       
@@ -114,17 +116,16 @@ namespace SmartHiveConnection
         /// </summary>
         static async Task OnDesiredPropertiesUpdate(TwinCollection desiredProperties, object userContext)
         {
-            var userContextValues  = userContext as Tuple<ServiceBusClient>;
-            if (userContextValues == null)
-            {
-                throw new InvalidOperationException("UserContext doesn't contain expected values");
-            }
-                
-                ServiceBusClient serviceBusClient = userContextValues.Item1;
+           
+                if (Program.serviceBusClient == null)
+                {
+                    throw new InvalidOperationException("ServiceBusClient context doesn't exist");
+                }
+                                
                 ModuleClient ioTHubModuleClient = ServiceBusClient.ioTHubModuleClient;
                 await serviceBusClient.Stop();
                 ServiceBusClientModel gatewayConfigModel = ServiceBusClientModel.InitClientModel(desiredProperties);
-                serviceBusClient = await ServiceBusClient.Init(gatewayConfigModel, ioTHubModuleClient);
+                serviceBusClient = ServiceBusClient.Init(gatewayConfigModel, ioTHubModuleClient);
 
         }
     }

@@ -3,8 +3,11 @@ FROM resin/raspberrypi3-debian:stretch
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libboost-python1.62.0 python3-pip libpython3-dev && \
-    rm -rf /var/lib/apt/lists/* 
+    apt-get install -y --no-install-recommends libcurl4-openssl-dev python3-pip libpython3-dev libboost-python1.62.0 libopenjp2-7 libopenjp3d7  libjpeg8-dev && \
+   rm -rf /var/lib/apt/lists/* 
+RUN apt-get update && apt-get upgrade
+
+
 
 RUN pip3 install --upgrade pip 
 RUN pip install --upgrade setuptools 

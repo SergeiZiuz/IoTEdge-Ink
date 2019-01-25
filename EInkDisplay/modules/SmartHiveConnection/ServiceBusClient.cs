@@ -18,12 +18,12 @@ namespace SmartHiveConnection
             private static ISubscriptionClient  subscriptionClient = null;
             internal static IoT.ModuleClient ioTHubModuleClient {get ; private set;}
             private const int CheckConnectionInterval = 1000;
-            private bool IsRunning = true;
+          //  private bool IsRunning = true;
             private ServiceBusClient(){
                 
             }
 
-             internal static async Task<ServiceBusClient> Init(ServiceBusClientModel  gatewayDeviceConfig, IoT.ModuleClient ioTHubModuleClient){
+             internal static ServiceBusClient Init(ServiceBusClientModel  gatewayDeviceConfig, IoT.ModuleClient ioTHubModuleClient){
 
                 if (gatewayDeviceConfig ==null || string.IsNullOrEmpty(gatewayDeviceConfig.ConnectionString) || 
                         string.IsNullOrEmpty(gatewayDeviceConfig.Topic) || string.IsNullOrEmpty(gatewayDeviceConfig.Subscription)){
@@ -51,27 +51,32 @@ namespace SmartHiveConnection
                     ServiceBusClient.subscriptionClient.RegisterMessageHandler(ServiceBusClient.ProcessMessagesAsync, messageHandlerOptions);
                     ServiceBusClient.ioTHubModuleClient = ioTHubModuleClient;           
                     
-                    await gateway.Start();
+                   // await gateway.Start();
                                        
                     return gateway;
                 }
             
 
-            private async Task Start(){
+  /*           private async Task Start(){
                     this.IsRunning = true;
                     await Task.Factory.StartNew(async()=> {
                                while (this.IsRunning)
                                 {
                                     //Check connection state
                                     if (ServiceBusClient.subscriptionClient.IsClosedOrClosing){
-
+                                        Console.WriteLine("Error: Service bus connection closed!");
+                                    }else{
+                                        //Debug message generation
+                                       string TestMessage = "{\"RoomId\": \"Conf Room MTC Msc Alexander Garden_26\",\"Schedule\": [{\"StartTime\": \"01/24/2019 10:30:00\",\"EndTime\": \"01/24/2019 13:30:00\",\"Location\": \"Conf Room MTC Msc Alexander Garden_26\",\"Title\": \"MTC Moscow (Russia) MS Day for Tupolev | Veronika Muravitskaya \",      \"Category\": \"\",\"MeetingExternalLink\": null},{\"StartTime\": \"01/24/2019 19:30:00\",\"EndTime\": \"01/24/2019 20:30:00\",\"Location\": \"Conf Room MTC Msc Alexander Garden_26\",\"Title\": \"MTC Moscow (Russia) Тестовое мероприятие\",\"Category\": \"\",\"MeetingExternalLink\": null}]}";
+                                       Message message = new Message(Encoding.UTF8.GetBytes(TestMessage));
+                                       await ProcessMessagesAsync(message, new CancellationToken());
                                     }
                                     await Task.Delay(CheckConnectionInterval);
                                 }
 
                                 await Stop();
                     });
-            }
+            }*/
 
             static async Task ProcessMessagesAsync(Message message, CancellationToken token)
             {
@@ -84,14 +89,15 @@ namespace SmartHiveConnection
                     byte[] messageBytes = Encoding.ASCII.GetBytes(msgBody);
                     IoT.Message  pipeMessage =  new IoT.Message(messageBytes);
                 //  Check if this is a schedule notification
+                string timestamp = DateTime.Now.ToString("dd/MM/yy hh:mm:ss");
                 if (ScheduleUpdateEventSchema.IsValid(msgBody)){
                     await ioTHubModuleClient.SendEventAsync("ScheduleOutput", pipeMessage);
-                    Console.WriteLine($"Sucessfull handling ScheduleOutput message");
+                    Console.WriteLine($"{timestamp} sucessfully handling ScheduleOutput message {msgBody}");
                  // Check if this is sensort notification
                 }else if (NotificationEventSchema.IsValid(msgBody))
                 {                    
                     await ioTHubModuleClient.SendEventAsync("SensorsOutput", pipeMessage);
-                    Console.WriteLine($"Sucessfull handling SensorsOutput message");
+                    Console.WriteLine($"{timestamp} sucessfully handling SensorsOutput message {msgBody}");
                 }else{
                      // Process the message
                     Console.WriteLine($"Unknown message format: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{msgBody}");
@@ -111,7 +117,7 @@ namespace SmartHiveConnection
             }
 
             internal async Task  Stop(){
-                    this.IsRunning = false;
+                  //  this.IsRunning = false;
                     Console.WriteLine($"Closing connection to Subscription {ServiceBusClient.clientModel.Subscription}");
                     
                     if (ServiceBusClient.subscriptionClient.IsClosedOrClosing){
