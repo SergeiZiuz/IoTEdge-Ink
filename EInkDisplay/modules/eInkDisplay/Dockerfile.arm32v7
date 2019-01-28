@@ -5,6 +5,7 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libcurl4-openssl-dev python3-pip libpython3-dev libboost-python1.62.0 libopenjp2-7 libopenjp3d7  libjpeg8-dev && \
    rm -rf /var/lib/apt/lists/* 
+   
 RUN apt-get update && apt-get upgrade
 
 

@@ -17,7 +17,7 @@ from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubE
 # By default, messages do not expire.
 MESSAGE_TIMEOUT = 10000
 
-# Choose HTTP, AMQP or  as transport protocol.  Currently only MQTT is supported.
+# Choose HTTP, MQTT or  as transport protocol.  Currently only MQTT is supported.
 PROTOCOL = IoTHubTransportProvider.MQTT
 
 # Callback received when the message that we're forwarding is processed.
@@ -51,14 +51,18 @@ def receive_schedule_message_callback(message, hubManager):
         print ( "<<<%s>>> & Size=%d\n" % (message_text, size) )
         
 
-
-
+# module_twin_callback is invoked when the module twin's desired properties are updated.
+def module_twin_callback(update_state, payload, user_context):
+    
+    print ( "\nTwin callback called with:\nupdateStatus = %s\npayload = %s\ncontext = %s\n" % (update_state, payload, user_context) )
+    data = json.loads(payload)
+    
 
 class HubManager(object):
 
     def __init__(
-            self,
-            protocol=IoTHubTransportProvider.MQTT):
+        self,
+        protocol=IoTHubTransportProvider.MQTT):
         self.client_protocol = protocol
         self.client = IoTHubModuleClient()
         self.client.create_from_environment(protocol)
@@ -66,17 +70,20 @@ class HubManager(object):
         # set the time until a message times out
         self.client.set_option("messageTimeout", MESSAGE_TIMEOUT)
         
+        # Sets the callback when a module twin's desired properties are updated.
+        self.client.set_module_twin_callback(module_twin_callback, self)
+
         # sets the callback when a message arrives on "ScheduleOutput" queue.  
         self.client.set_message_callback("ScheduleInput", receive_schedule_message_callback, self)
         
         # sets the callback when a message arrives on "SensorsOutputInput" queue.  
         #self.client.set_message_callback("SensorsInput", receive_sensor_notification_callback, self)
-
+        print("Initialization done.\n")
 
     # Forwards the message received onto the next stage in the process.
-    #def forward_event_to_output(self, outputQueueName, event, send_context):
-     #   self.client.send_event_async(
-     #       outputQueueName, event, send_confirmation_callback, send_context)
+        def forward_event_to_output(self, outputQueueName, event, send_context):
+            self.client.send_event_async(
+                outputQueueName, event, send_confirmation_callback, send_context)
 
 def main(protocol):
     try:
@@ -85,8 +92,8 @@ def main(protocol):
 
         hub_manager = HubManager(protocol)
 
-        print ( "Starting the IoT Hub connection using protocol %s..." % hub_manager.client_protocol )
-        print ( "Listening incomming room messages.  Press Ctrl-C to exit. ")
+        print ( "Starting the IoT Hub connection using protocol %s...\n" % hub_manager.client_protocol )
+        print ( "Listening incomming room messages.  Press Ctrl-C to exit. \n")
 
         while True:
             time.sleep(1)

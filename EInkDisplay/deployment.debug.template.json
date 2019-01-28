@@ -58,6 +58,11 @@
                   }
                 }
               }
+            },            
+            "env": {
+              "OptimizeForPerformance": {
+                  "value": "false"
+              }
             }
           }
         },
