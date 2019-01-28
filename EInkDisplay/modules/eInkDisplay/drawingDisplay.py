@@ -8,6 +8,8 @@ from PIL import Image,ImageDraw,ImageFont
 import traceback
 from datetime import date
 
+FIRSTLINECOLON = ''
+SECONDLINECOLON = ''
 
 class DrawingDisplay:
     def __init__(self, roomSchedule, sensor, currentTime1, formatTime):
@@ -17,11 +19,23 @@ class DrawingDisplay:
         self.formatTime = formatTime
 
     def drawDisplay(self):
-        if len(self.sensor) <= 35:
+        lengthSt = len(self.sensor)
+        if lengthSt <= 35:
             print(len(self.sensor))
+            FIRSTLINECOLON = self.sensor
             self.drawDisplayOneLine()
         else:
             print(len(self.sensor))
+            if self.sensor[35] != ' ':
+                for i in range(1, 35):
+                    nc = 35 - i
+                    if self.sensor == ' ':
+                        FIRSTLINECOLON = self.sensor[0:nc]
+                        SECONDLINECOLON = self.sensor[nc+1:lengthSt]
+                        break
+            else:
+                FIRSTLINECOLON = self.sensor[0:35]
+                SECONDLINECOLON = self.sensor[36:lengthSt]
             self.drawTwoLinesDisplay()
 
     def drawDisplayOneLine(self):
@@ -45,7 +59,6 @@ class DrawingDisplay:
             # Temp ___
             #lableRoomText = 'Название комнаты'
             firstLineTime = '10:00 - 11:00'
-            firstLineText = '12345678901234567890123456789012345'
             secondLineTime = '11:00 - 12:00'
             secondLineText = 'Test screen line two'
             thirdLineTime = '12:00 - 13:00'
@@ -77,7 +90,7 @@ class DrawingDisplay:
 
             # Draw schedule
             draw.text((5, 110), firstLineTime, font = font24, fill = 0)
-            draw.text((170, 110), firstLineText, font = font24, fill = 0)
+            draw.text((170, 110), FIRSTLINECOLON, font = font24, fill = 0)
             draw.text((5, 174), secondLineTime, font = font24, fill = 0)
             draw.text((170, 174), secondLineText, font = font24, fill = 0)
             draw.text((5, 238), thirdLineTime, font = font24, fill = 0)
@@ -110,9 +123,6 @@ class DrawingDisplay:
             # Temp ___
             #lableRoomText = 'Название комнаты'
             firstLineTime = '10:00 - 11:00'
-            firstLineText = '12345678901234567890123456789012345'
-            secondLineTime = '11:00 - 12:00'
-            secondLineText = 'Test screen line two'
             thirdLineTime = '12:00 - 13:00'
             thirdLineText = 'Test screen line three'
             currentTime = '19 Февраля 2019 14:56'
@@ -143,8 +153,8 @@ class DrawingDisplay:
 
             # Draw schedule
             draw.text((5, 130), firstLineTime, font = font24, fill = 0)
-            draw.text((170, 110), firstLineText, font = font24, fill = 0)
-            draw.text((170, 145), firstLineText, font = font24, fill=0)
+            draw.text((170, 110), FIRSTLINECOLON, font = font24, fill = 0)
+            draw.text((170, 145), SECONDLINECOLON, font = font24, fill=0)
             #draw.text((5, 174), secondLineTime, font = font24, fill = 0)
             #draw.text((170, 174), secondLineText, font = font24, fill = 0)
             draw.text((5, 226), thirdLineTime, font = font24, fill = 0)
