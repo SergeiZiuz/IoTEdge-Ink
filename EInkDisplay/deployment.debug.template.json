@@ -79,6 +79,19 @@
                   "5678/tcp": {}
                 },
                 "HostConfig": {
+                  "Priviledged": true,
+                  "Devices": [
+                    {
+                      "PathOnHost": "/dev/spidev0.0",
+                      "PathInContainer": "/dev/spidev0.0",
+                      "CgroupPermissions": "rwm"
+                    },
+                    {
+                      "PathOnHost": "/dev/mem",
+                      "PathInContainer": "/dev/mem",
+                      "CgroupPermissions": "rwm"
+                    }
+                  ],
                   "PortBindings": {
                     "5678/tcp": [
                       {
