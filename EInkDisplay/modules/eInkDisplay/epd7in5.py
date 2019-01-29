@@ -120,7 +120,6 @@ class EPD:
         epdconfig.spi_writebyte([command])
 
     def send_data(self, data):
-#        print("Send_data")
         epdconfig.digital_write(self.dc_pin, GPIO.HIGH)
         epdconfig.spi_writebyte([data])
         
