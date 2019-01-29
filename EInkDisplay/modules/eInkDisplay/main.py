@@ -3,7 +3,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for
 # full license information.
 
-import pdb
+import drawingDisplay
 import random
 import time
 import sys
@@ -21,17 +21,6 @@ MESSAGE_TIMEOUT = 10000
 # Choose HTTP, MQTT or  as transport protocol.  Currently only MQTT is supported.
 PROTOCOL = IoTHubTransportProvider.MQTT
 
-# Callback received when the message that we're forwarding is processed.
-def send_confirmation_callback(message, result, user_context):
-    
-    print ( "Confirmation[%d] received for message with result = %s" % (user_context, result) )
-    map_properties = message.properties()
-    key_value_pair = map_properties.get_internals()
-    print ( "    Properties: %s" % key_value_pair )
-    SEND_CALLBACKS += 1
-    print ( "    Total calls confirmed: %d" % SEND_CALLBACKS )
-
-
 # receive_schedule_message_callback is invoked when message with room schedule data arrives
 def receive_schedule_message_callback(message, hubManager):
     
@@ -45,6 +34,8 @@ def receive_schedule_message_callback(message, hubManager):
         engagements_cnt = len(room_schedule["Schedule"])
         print ( "%d engagements in the room <<<%s>>>\n" % (engagements_cnt, room_schedule["RoomId"]) )
         
+        
+
         return IoTHubMessageDispositionResult.ACCEPTED
 
     except Exception as err:
@@ -57,6 +48,7 @@ def module_twin_callback(update_state, payload, user_context):
     
     print ( "\nTwin callback called with:\nupdateStatus = %s\npayload = %s\ncontext = %s\n" % (update_state, payload, user_context) )
     data = json.loads(payload)
+
     
 
 class HubManager(object):

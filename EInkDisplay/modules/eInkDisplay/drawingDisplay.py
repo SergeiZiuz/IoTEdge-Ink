@@ -12,7 +12,7 @@ from datetime import date
 # SECONDLINECOLON = ''
 
 class DrawingDisplay:
-    def __init__(self, roomSchedule, sensor, currentTime1, formatTime):
+    def __init__(self,  formatTime):
         self.roomSchedule = roomSchedule
         self.sensor = sensor
         self.currentTime1 = currentTime1
