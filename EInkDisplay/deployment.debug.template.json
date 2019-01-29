@@ -87,6 +87,11 @@
                       "CgroupPermissions": "rwm"
                     },
                     {
+                      "PathOnHost": "/dev/gpiomem",
+                      "PathInContainer": "/dev/gpiomem",
+                      "CgroupPermissions": "rwm"
+                  },
+                    {
                       "PathOnHost": "/dev/mem",
                       "PathInContainer": "/dev/mem",
                       "CgroupPermissions": "rwm"
