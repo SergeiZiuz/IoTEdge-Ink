@@ -4,9 +4,12 @@
 import drawingDisplay
 
 print('Start Creat display')
-display = drawingDisplay.DrawingDisplay('Room Title', '123456 789012345678 901234 567890 1234 56789', 'time', 'format Time')
+display = drawingDisplay.DrawingDisplay('Room Title', 'dd/MM/yyyy hh:mm')
 
-display.drawDisplay()
+roomSchedule = [{"StartTime":"01/29/2019 10:00:00","EndTime":"01/29/2019 13:00:00","Location":"Conf Room MTC Msc Alexander Garden_26","Title":"Тестовое мероприятие","Category":"","MeetingExternalLink":None},{"StartTime":"01/29/2019 13:00:00","EndTime":"01/29/2019 14:00:00","Location":"Conf Room MTC Msc Alexander Garden_26","Title":"MTC Moscow (Russia) Тестовое 2","Category":"","MeetingExternalLink":None},{"StartTime":"01/29/2019 14:00:00","EndTime":"01/29/2019 15:00:00","Location":"Conf Room MTC Msc Alexander Garden_26","Title":"MTC Moscow (Russia) Тестовое 3","Category":"","MeetingExternalLink":None}]
+
+
+display.drawDisplay(roomSchedule)
 #display.drawTwoLinesDisplay()
 
 # {  
@@ -25,3 +28,6 @@ display.drawDisplay()
 #         'Schedule'
 #     ]
 # }
+
+# 29/01/19 12:47:50 sucessfully handling ScheduleOutput message {"RoomId":"Conf Room MTC Msc Alexander Garden_26","Schedule":[{"StartTime":"01/29/2019 10:00:00","EndTime":"01/29/2019 13:00:00","Location":"Conf Room MTC Msc Alexander Garden_26","Title":"MTC Moscow (Russia) Тестовое мероприятие","Category":"","MeetingExternalLink":null}]}
+# 29/01/19 12:59:49 sucessfully handling ScheduleOutput message {"RoomId":"Conf Room MTC Msc Alexander Garden_26","Schedule":[{"StartTime":"01/29/2019 10:00:00","EndTime":"01/29/2019 13:00:00","Location":"Conf Room MTC Msc Alexander Garden_26","Title":"MTC Moscow (Russia) Тестовое мероприятие","Category":"","MeetingExternalLink":null},{"StartTime":"01/29/2019 13:00:00","EndTime":"01/29/2019 14:00:00","Location":"Conf Room MTC Msc Alexander Garden_26","Title":"MTC Moscow (Russia) Тестовое 2","Category":"","MeetingExternalLink":null},{"StartTime":"01/29/2019 14:00:00","EndTime":"01/29/2019 15:00:00","Location":"Conf Room MTC Msc Alexander Garden_26","Title":"MTC Moscow (Russia) Тестовое 3","Category":"","MeetingExternalLink":null}]}

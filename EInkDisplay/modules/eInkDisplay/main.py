@@ -76,9 +76,9 @@ class HubManager(object):
         print("Initialization done.\n")
 
     # Forwards the message received onto the next stage in the process.
-     #   def forward_event_to_output(self, outputQueueName, event, send_context):
-      #      self.client.send_event_async(
-       #         outputQueueName, event, send_confirmation_callback, send_context)
+        # def forward_event_to_output(self, outputQueueName, event, send_context):
+        #     self.client.send_event_async(
+        #         outputQueueName, event, send_confirmation_callback, send_context)
 
 def main(protocol):
     try:
