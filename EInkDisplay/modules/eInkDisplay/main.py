@@ -21,6 +21,8 @@ MESSAGE_TIMEOUT = 10000
 # Choose HTTP, MQTT or  as transport protocol.  Currently only MQTT is supported.
 PROTOCOL = IoTHubTransportProvider.MQTT
 
+DISPLAY_DRIVER = drawingDisplay("","dd/MM/yyyy hh:mm")
+
 # receive_schedule_message_callback is invoked when message with room schedule data arrives
 def receive_schedule_message_callback(message, hubManager):
     
@@ -74,9 +76,9 @@ class HubManager(object):
         print("Initialization done.\n")
 
     # Forwards the message received onto the next stage in the process.
-        def forward_event_to_output(self, outputQueueName, event, send_context):
-            self.client.send_event_async(
-                outputQueueName, event, send_confirmation_callback, send_context)
+     #   def forward_event_to_output(self, outputQueueName, event, send_context):
+      #      self.client.send_event_async(
+       #         outputQueueName, event, send_confirmation_callback, send_context)
 
 def main(protocol):
     try:

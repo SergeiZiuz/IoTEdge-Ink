@@ -12,13 +12,13 @@ from datetime import date
 # SECONDLINECOLON = ''
 
 class DrawingDisplay:
-    def __init__(self,  formatTime):
-        self.roomSchedule = roomSchedule
-        self.sensor = sensor
-        self.currentTime1 = currentTime1
+    def __init__(self, roomTitle, formatTime):
+        self.roomTitle = roomTitle
         self.formatTime = formatTime
         self.firstStLineColon = ''
         self.secondStLineColon = ''
+
+    
 
     def drawDisplay(self):
         lengthSt = len(self.sensor)
