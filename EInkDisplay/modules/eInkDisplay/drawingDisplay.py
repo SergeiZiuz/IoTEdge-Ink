@@ -8,8 +8,8 @@ from PIL import Image,ImageDraw,ImageFont
 import traceback
 from datetime import date
 
-FIRSTLINECOLON = ''
-SECONDLINECOLON = ''
+# FIRSTLINECOLON = ''
+# SECONDLINECOLON = ''
 
 class DrawingDisplay:
     def __init__(self, roomSchedule, sensor, currentTime1, formatTime):
@@ -17,25 +17,30 @@ class DrawingDisplay:
         self.sensor = sensor
         self.currentTime1 = currentTime1
         self.formatTime = formatTime
+        self.firstStLineColon = ''
+        self.secondStLineColon = ''
 
     def drawDisplay(self):
         lengthSt = len(self.sensor)
         if lengthSt <= 35:
             print(len(self.sensor))
-            FIRSTLINECOLON = self.sensor
+            self.firstStLineColon = self.sensor
             self.drawDisplayOneLine()
         else:
             print(len(self.sensor))
             if self.sensor[35] != ' ':
                 for i in range(1, 35):
                     nc = 35 - i
-                    if self.sensor == ' ':
-                        FIRSTLINECOLON = self.sensor[0:nc]
-                        SECONDLINECOLON = self.sensor[nc+1:lengthSt]
+                    if self.sensor[nc] == ' ':
+                        self.firstStLineColon = self.sensor[0:nc]
+                        self.secondStLineColon = self.sensor[nc+1:lengthSt]
+                        print(self.firstStLineColon)
+                        print(self.secondStLineColon)
                         break
+                        
             else:
-                FIRSTLINECOLON = self.sensor[0:35]
-                SECONDLINECOLON = self.sensor[36:lengthSt]
+                self.firstStLineColon = self.sensor[0:35]
+                self.secondStLineColon = self.sensor[36:lengthSt]
             self.drawTwoLinesDisplay()
 
     def drawDisplayOneLine(self):
@@ -90,7 +95,7 @@ class DrawingDisplay:
 
             # Draw schedule
             draw.text((5, 110), firstLineTime, font = font24, fill = 0)
-            draw.text((170, 110), FIRSTLINECOLON, font = font24, fill = 0)
+            draw.text((170, 110), self.firstStLineColon, font = font24, fill = 0)
             draw.text((5, 174), secondLineTime, font = font24, fill = 0)
             draw.text((170, 174), secondLineText, font = font24, fill = 0)
             draw.text((5, 238), thirdLineTime, font = font24, fill = 0)
@@ -153,8 +158,8 @@ class DrawingDisplay:
 
             # Draw schedule
             draw.text((5, 130), firstLineTime, font = font24, fill = 0)
-            draw.text((170, 110), FIRSTLINECOLON, font = font24, fill = 0)
-            draw.text((170, 145), SECONDLINECOLON, font = font24, fill=0)
+            draw.text((170, 110), self.firstStLineColon, font = font24, fill = 0)
+            draw.text((170, 145), self.secondStLineColon, font = font24, fill=0)
             #draw.text((5, 174), secondLineTime, font = font24, fill = 0)
             #draw.text((170, 174), secondLineText, font = font24, fill = 0)
             draw.text((5, 226), thirdLineTime, font = font24, fill = 0)
