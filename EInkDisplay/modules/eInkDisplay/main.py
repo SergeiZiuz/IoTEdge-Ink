@@ -36,7 +36,7 @@ def receive_schedule_message_callback(message, hubManager):
         engagements_cnt = len(room_schedule["Schedule"])
         print ( "%d engagements in the room <<<%s>>>\n" % (engagements_cnt, room_schedule["RoomId"]) )
         
-        DISPLAY_DRIVER.drawDisplay(engagements_cnt)
+        DISPLAY_DRIVER.drawDisplay(room_schedule["Schedule"])
 
         return IoTHubMessageDispositionResult.ACCEPTED
 
