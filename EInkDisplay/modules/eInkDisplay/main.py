@@ -29,8 +29,8 @@ def receive_schedule_message_callback(message, hubManager):
     try:
         message_buffer = message.get_bytearray()
         size = len(message_buffer)
-        message_text = message_buffer[:size].decode('utf-8')
-
+        message_text = message_buffer[:size].decode('utf8')
+        
         room_schedule = json.loads(message_text)        
 
         engagements_cnt = len(room_schedule["Schedule"])

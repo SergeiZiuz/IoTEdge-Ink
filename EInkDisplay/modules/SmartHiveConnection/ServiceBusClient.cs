@@ -86,7 +86,7 @@ namespace SmartHiveConnection
                 }
                
 
-                    byte[] messageBytes = Encoding.ASCII.GetBytes(msgBody);
+                    byte[] messageBytes = Encoding.UTF8.GetBytes(msgBody);
                     IoT.Message  pipeMessage =  new IoT.Message(messageBytes);
                 //  Check if this is a schedule notification
                 string timestamp = DateTime.Now.ToString("dd/MM/yy hh:mm:ss");
