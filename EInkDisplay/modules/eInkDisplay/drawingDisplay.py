@@ -6,7 +6,7 @@ import epd7in5
 import time
 from PIL import Image,ImageDraw,ImageFont
 import traceback
-from time import gmtime, strftime
+from datetime import datetime
 
 class DrawingDisplay:
     def __init__(self, roomTitle, formatTime):
@@ -14,9 +14,8 @@ class DrawingDisplay:
         self.formatTime = formatTime
 
     def drawDisplay(self, engagements):
-        print(engagements)
+        print("Engagements", engagements)
         if engagements != []:
-            print("Engagements", engagements)
             title = engagements[0]["Title"]
             countEngagements = len(engagements)
             if len(title) <= 35:
@@ -28,7 +27,6 @@ class DrawingDisplay:
 
     def drawOneLineDisplay(self, countEngagements, engagements):
         try:
-            print('One line display')
             epd = epd7in5.EPD()
             epd.init()
             # epd.Clear(0xFF)
@@ -47,7 +45,7 @@ class DrawingDisplay:
             secondLineText = ''
             thirdLineTime = ''
             thirdLineText = ''
-            currentTime = strftime("%d/%m/%Y %H:%M", gmtime())
+            currentTime = datetime.now().strftime('%d/%m/%Y %H:%M')
 
             countEngagements = 0
             for engagement in engagements:
@@ -120,7 +118,6 @@ class DrawingDisplay:
 
     def drawTwoLinesDisplay(self, countEngagements, engagements):
         try:
-            print('Two line display')
             epd = epd7in5.EPD()
             epd.init()
             # epd.Clear(0xFF)
@@ -140,7 +137,7 @@ class DrawingDisplay:
             secondRowOneLineText = ''
             secondRowTwoLineText = ''
             secondRowCenterLineText = ''
-            currentTime = strftime("%d/%m/%Y %H:%M", gmtime())
+            currentTime = datetime.now().strftime('%d/%m/%Y %H:%M')
             
             # Set local vars
             countEngagements = 0
@@ -202,7 +199,6 @@ class DrawingDisplay:
 
     def drawDisplayWithoutEngagements(self):
         try:
-            print('Drawing display without engagements')
             epd = epd7in5.EPD()
             epd.init()
             # epd.Clear(0xFF)
@@ -214,7 +210,7 @@ class DrawingDisplay:
             font30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
             font46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
             logoPath = './images/VTB.png'
-            currentTime = strftime("%d/%m/%Y %H:%M", gmtime())
+            currentTime = datetime.now().strftime('%d/%m/%Y %H:%M')
 
             # Draw frame
             draw.line((0, 90, 640, 90), fill = 0)

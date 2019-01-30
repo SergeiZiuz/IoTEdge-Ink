@@ -97,7 +97,6 @@ VCM_DC_SETTING                              = 0x82
 
 class EPD:
     def __init__(self):
-        print("__init__")
         self.reset_pin = epdconfig.RST_PIN
         self.dc_pin = epdconfig.DC_PIN
         self.busy_pin = epdconfig.BUSY_PIN
@@ -106,7 +105,6 @@ class EPD:
     
     # Hardware reset
     def reset(self):
-        print("reset")
         epdconfig.digital_write(self.reset_pin, GPIO.HIGH)
         epdconfig.delay_ms(200) 
         epdconfig.digital_write(self.reset_pin, GPIO.LOW)         # module reset
@@ -115,7 +113,6 @@ class EPD:
         epdconfig.delay_ms(200)   
 
     def send_command(self, command):
-        print("send_command")
         epdconfig.digital_write(self.dc_pin, GPIO.LOW)
         epdconfig.spi_writebyte([command])
 
@@ -124,13 +121,10 @@ class EPD:
         epdconfig.spi_writebyte([data])
         
     def wait_until_idle(self):
-        print("e-Paper busy")
         while(epdconfig.digital_read(self.busy_pin) == 0):      # 0: idle, 1: busy
-            epdconfig.delay_ms(100)    
-        print("e-Paper busy release")
+            epdconfig.delay_ms(100)
         
     def init(self):
-        print("init")
         if (epdconfig.module_init() != 0):
             return -1
         # EPD hardware init start
@@ -170,12 +164,10 @@ class EPD:
         return 0
 
     def getbuffer(self, image):
-        print("getbuffer")
         buf = [0x00] * (self.width * self.height // 4)
         image_monocolor = image.convert('1')
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
-        print("imwidth = ", imwidth, "imheight = ", imheight)
         if(imwidth == self.width and imheight == self.height):
             for y in range(imheight):
                 for x in range(imwidth):
@@ -202,7 +194,6 @@ class EPD:
         return buf    
         
     def display(self, image):
-        print("Display")
         self.send_command(DATA_START_TRANSMISSION_1)
         for i in range(0, self.width // 4 * self.height):
             temp1 = image[i]
@@ -231,7 +222,6 @@ class EPD:
         self.wait_until_idle()
         
     def Clear(self, color):
-        print("Clear all")
         self.send_command(DATA_START_TRANSMISSION_1)
         for i in range(0, self.width // 4 * self.height):
             for j in range(0, 4):
@@ -240,7 +230,6 @@ class EPD:
         self.wait_until_idle()
 
     def sleep(self):
-        print("Sleep")
         self.send_command(POWER_OFF)
         self.wait_until_idle()
         self.send_command(DEEP_SLEEP)

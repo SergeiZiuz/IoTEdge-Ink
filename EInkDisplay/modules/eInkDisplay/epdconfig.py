@@ -39,14 +39,12 @@ import RPi.GPIO as GPIO
 import time
 
 # Pin definition
-print ("Pin definition")
 RST_PIN         = 17
 DC_PIN          = 25
 CS_PIN          = 8
 BUSY_PIN        = 24
 
 # SPI device, bus = 0, device = 0
-print ("SPI device")
 SPI = spidev.SpiDev(0, 0)
 
 def digital_write(pin, value):
@@ -70,6 +68,6 @@ def module_init():
     GPIO.setup(BUSY_PIN, GPIO.IN)
     SPI.max_speed_hz = 2000000
     SPI.mode = 0b00
-    return 0;
+    return 0
 
 ### END OF FILE ###
