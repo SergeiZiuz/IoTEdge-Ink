@@ -21,7 +21,7 @@ MESSAGE_TIMEOUT = 10000
 # Choose HTTP, MQTT or  as transport protocol.  Currently only MQTT is supported.
 PROTOCOL = IoTHubTransportProvider.MQTT
 
-DISPLAY_DRIVER = drawingDisplay.DrawingDisplay("Room Title","dd/MM/yyyy hh:mm")
+DISPLAY_DRIVER = drawingDisplay.DrawingDisplay("Room Title","%d/%m/%Y %H:%M")
 
 # receive_schedule_message_callback is invoked when message with room schedule data arrives
 def receive_schedule_message_callback(message, hubManager):

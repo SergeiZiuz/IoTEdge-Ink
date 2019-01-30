@@ -45,7 +45,7 @@ class DrawingDisplay:
             secondLineText = ''
             thirdLineTime = ''
             thirdLineText = ''
-            currentTime = datetime.now().strftime('%d/%m/%Y %H:%M')
+            currentTime = datetime.now().strftime(self.formatTime)
 
             countEngagements = 0
             for engagement in engagements:
@@ -137,7 +137,7 @@ class DrawingDisplay:
             secondRowOneLineText = ''
             secondRowTwoLineText = ''
             secondRowCenterLineText = ''
-            currentTime = datetime.now().strftime('%d/%m/%Y %H:%M')
+            currentTime = datetime.now().strftime(self.formatTime)
             
             # Set local vars
             countEngagements = 0
@@ -210,7 +210,7 @@ class DrawingDisplay:
             font30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
             font46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
             logoPath = './images/VTB.png'
-            currentTime = datetime.now().strftime('%d/%m/%Y %H:%M')
+            currentTime = datetime.now().strftime(self.formatTime)
 
             # Draw frame
             draw.line((0, 90, 640, 90), fill = 0)
