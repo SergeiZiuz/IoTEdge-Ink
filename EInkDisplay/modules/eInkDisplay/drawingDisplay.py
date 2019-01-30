@@ -14,19 +14,17 @@ class DrawingDisplay:
         self.formatTime = formatTime
 
     def drawDisplay(self, engagements):
-        title = engagements[0]["Title"]
-        countEngagements = len(engagements)
-        if countEngagements != None:
+        print(engagements)
+        if engagements != []:
+            print("Engagements", engagements)
+            title = engagements[0]["Title"]
+            countEngagements = len(engagements)
             if len(title) <= 35:
                 self.drawOneLineDisplay(countEngagements, engagements)
             else:
                 self.drawTwoLinesDisplay(countEngagements, engagements)
         else:
             self.drawDisplayWithoutEngagements()
-
-            # print(len(self.sensor))
-            
-            # self.drawTwoLinesDisplay()
 
     def drawOneLineDisplay(self, countEngagements, engagements):
         try:
@@ -49,23 +47,23 @@ class DrawingDisplay:
             secondLineText = ''
             thirdLineTime = ''
             thirdLineText = ''
-            currentTime = ''
+            currentTime = '19 Февраля 2019 14:56'
 
-            i = 0
-            lt = len(engagements["StartTime"]) - 3
+            countEngagements = 0
             for engagement in engagements:
-                if i == 0:
+                lt = len(engagement["StartTime"]) - 3
+                if countEngagements == 0:
                     firstLineTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
                     firstLineText = engagement["Title"]
-                elif i == 1:
+                elif countEngagements == 1:
                     secondLineTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
                     secondLineText = engagement["Title"]
-                elif i == 2:
+                elif countEngagements == 2:
                     thirdLineTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
                     thirdLineText = engagement["Title"]
                 else:
-                    print(engagement[i]["Title"])
-                i += 1
+                    print(engagement["Title"])
+                countEngagements += 1
             
             # Draw frame
             draw.line((0, 90, 640, 90), fill = 0)
@@ -108,11 +106,11 @@ class DrawingDisplay:
     def separatingAtTwoLines(self, engagement):
         lengthEngagementTitle = len(engagement["Title"])
         if engagement["Title"][35] != ' ':
-            for i in range(1, 35):
-                nc = 35 - i
+            for count in range(1, 35):
+                nc = 35 - count
                 if engagement["Title"][nc] == ' ':
                     firstStLineColon = engagement["Title"][0:nc]
-                    secondStLineColon = engagement[nc+1:lengthEngagementTitle]
+                    secondStLineColon = engagement["Title"][nc+1:lengthEngagementTitle]
                     break
         else:
             firstStLineColon = engagement["Title"][0:35]
@@ -141,42 +139,28 @@ class DrawingDisplay:
             secondRowTime = ''
             secondRowOneLineText = ''
             secondRowTwoLineText = ''
+            secondRowCenterLineText = ''
             currentTime = '19 Февраля 2019 14:56'
             
             # Set local vars
-            i = 0
-            lt = len(engagements["StartTime"]) - 3
+            countEngagements = 0
             for engagement in engagements:
-                if i == 0:
-                    firstRowTime = engagements["StartTime"][11:lt] + "-" + engagements["EndTime"][11:lt]
-                    # firstRowOneLineText = self.separatingAtTwoLines(engagement)["FirstLine"]
+                lt = len(engagement["StartTime"]) - 3
+                if countEngagements == 0:
+                    firstRowTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
+                    firstRowOneLineText = self.separatingAtTwoLines(engagement)["FirstLine"]
+                    firstRowTwoLineText = self.separatingAtTwoLines(engagement)["SecondLine"]
+                elif countEngagements == 1:
+                    secondRowTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
                     lengthEngagementTitle = len(engagement["Title"])
-                    if engagement["Title"][35] != " ":
-                        for i in range(1, 35):
-                            nc = 35 - i
-                            if engagement["Title"][nc] == ' ':
-                                firstRowOneLineText = engagement["Title"][0:nc]
-                                firstRowTwoLineText = engagement["Title"][nc+1:lengthEngagementTitle]
-                                break
+                    if lengthEngagementTitle > 35:
+                        secondRowOneLineText = self.separatingAtTwoLines(engagement)["FirstLine"]
+                        secondRowTwoLineText = self.separatingAtTwoLines(engagement)["SecondLine"]
                     else:
-                        firstRowOneLineText = engagement["Title"][0:35]
-                        firstRowTwoLineText = engagement["Title"][36:lengthEngagementTitle]
-                elif i == 1:
-                    secondRowTime = engagements["StartTime"][11:lt] + "-" + engagements["EndTime"][11:lt]
-                    lengthEngagementTitle = len(engagement["Title"])
-                    if engagement["Title"][35] != " ":
-                        for i in range(1, 35):
-                            nc = 35 - i
-                            if engagement["Title"][nc] == ' ':
-                                secondRowOneLineText = engagement["Title"][0:nc]
-                                secondRowTwoLineText = engagement["Title"][nc+1:lengthEngagementTitle]
-                                break
-                    else:
-                        secondRowOneLineText = engagement["Title"][0:35]
-                        secondRowTwoLineText = engagement["Title"][36:lengthEngagementTitle]
+                        secondRowCenterLineText = engagement["Title"]
                 else:
-                    print(engagements[i]["Title"])
-                i += 1
+                    print(engagement["Title"])
+                countEngagements += 1
 
             # Draw frame
             draw.line((0, 90, 640, 90), fill = 0)
@@ -206,6 +190,7 @@ class DrawingDisplay:
             draw.text((5, 226), secondRowTime, font = font24, fill = 0)
             draw.text((170, 206), secondRowOneLineText, font = font24, fill = 0)
             draw.text((170, 241), secondRowTwoLineText, font = font24, fill = 0)
+            draw.text((170, 226), secondRowCenterLineText, font = font24, fill=0)
             draw.text((5, 305), currentTime, font = font46, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
@@ -226,7 +211,10 @@ class DrawingDisplay:
             draw = ImageDraw.Draw(HImage)
 
             # Local var
+            font30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
+            font46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
             logoPath = './images/VTB.png'
+            currentTime = '19 Февраля 2019 14:56'
 
             # Draw frame
             draw.line((0, 90, 640, 90), fill = 0)
@@ -246,6 +234,7 @@ class DrawingDisplay:
 
             # Draw title room
             draw.text((200, 30), self.roomTitle, font = font30, fill = 0)
+            draw.text((5, 305), currentTime, font = font46, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
             time.sleep(2)
