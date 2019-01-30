@@ -6,7 +6,7 @@ import epd7in5
 import time
 from PIL import Image,ImageDraw,ImageFont
 import traceback
-from datetime import date
+from time import gmtime, strftime
 
 class DrawingDisplay:
     def __init__(self, roomTitle, formatTime):
@@ -47,7 +47,7 @@ class DrawingDisplay:
             secondLineText = ''
             thirdLineTime = ''
             thirdLineText = ''
-            currentTime = '19 Февраля 2019 14:56'
+            currentTime = strftime("%d/%m/%Y %H:%M", gmtime())
 
             countEngagements = 0
             for engagement in engagements:
@@ -140,7 +140,7 @@ class DrawingDisplay:
             secondRowOneLineText = ''
             secondRowTwoLineText = ''
             secondRowCenterLineText = ''
-            currentTime = '19 Февраля 2019 14:56'
+            currentTime = strftime("%d/%m/%Y %H:%M", gmtime())
             
             # Set local vars
             countEngagements = 0
@@ -214,7 +214,7 @@ class DrawingDisplay:
             font30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
             font46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
             logoPath = './images/VTB.png'
-            currentTime = '19 Февраля 2019 14:56'
+            currentTime = strftime("%d/%m/%Y %H:%M", gmtime())
 
             # Draw frame
             draw.line((0, 90, 640, 90), fill = 0)
