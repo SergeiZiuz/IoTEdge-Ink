@@ -150,12 +150,12 @@ namespace SmartHiveConnection
         public string ConnectionString  {get; set;}
         public string Topic {get; set;}
         public string Subscription {get; set;}
-        public string DateTimeFormat {get; set; } = @"dd\/MM\/yyyy HH:mm";
+        public string DateTimeFormat {get; set; } = @"dd/MM/yyyy HH:mm";
         
         public int  CheckConnectionInterval {get; set;} =1000;
 
         /** If event finished it will be removed from display after this period of time  */
-        public int  eventsExpiration {get; set;} =5*60*60;
+        public int  eventsExpiration {get; set;} =5*60;
 
         public static ServiceBusClientModel InitClientModel(TwinCollection settings){
             

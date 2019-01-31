@@ -1,5 +1,8 @@
 FROM microsoft/dotnet:2.1-runtime-stretch-slim AS base
 
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends unzip procps && \
     rm -rf /var/lib/apt/lists/*
@@ -9,6 +12,9 @@ USER moduleuser
 RUN curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg
 
 FROM microsoft/dotnet:2.1-sdk AS build-env
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 WORKDIR /app
 
 COPY *.csproj ./
