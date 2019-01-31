@@ -124,7 +124,9 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "Title":"Александровский сад",
-        "DateTimeFormat": "dd/MM/yyyy HH:mm",
+        "ClockDateTimeFormat": "%d %b. %H:%M",
+        "DateTimeFormat": "%d/%m/%Y %H:%M",
+        "Locale": "ru_RU.UTF-8",
         "IconTopUrl": "",
         "IconBottomUrl": "",
         "VideoUrl": ""

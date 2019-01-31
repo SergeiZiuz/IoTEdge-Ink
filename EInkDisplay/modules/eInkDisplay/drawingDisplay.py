@@ -9,7 +9,7 @@ import traceback
 from datetime import datetime
 
 # VARS
-FORMATTIMEFROMJSON = '%m/%d/%Y %H:%M:%S'
+FORMATTIMEFROMJSON = '%d/%m/%Y %H:%M'
 SCREENTIMEFORMAT = '%H:%M'
 MAXLINELENGTH = 35
 FONT24 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 24)

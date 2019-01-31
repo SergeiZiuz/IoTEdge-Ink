@@ -9,6 +9,7 @@ import time
 import sys
 import iothub_client
 import json
+import locale
 # pylint: disable=E0611
 from iothub_client import IoTHubModuleClient, IoTHubClientError, IoTHubTransportProvider
 from iothub_client import IoTHubMessage, IoTHubMessageDispositionResult, IoTHubError
@@ -49,9 +50,27 @@ def receive_schedule_message_callback(message, hubManager):
 def module_twin_callback(update_state, payload, user_context):
     
     print ( "\nTwin callback called with:\nupdateStatus = %s\npayload = %s\ncontext = %s\n" % (update_state, payload, user_context) )
-    data = json.loads(payload)
-
+    twin_data = json.loads(payload)
+    global DISPLAY_DRIVER
     
+    desired_properties = twin_data["desired"]
+    if desired_properties is None:
+        return
+    else:
+        # Reading Room title from module twin
+        if desired_properties["Title"] is not None:
+            DISPLAY_DRIVER.roomTitle = desired_properties["Title"]
+            print("Room Title set as %s" % desired_properties["Title"])
+
+        # Reading Reading clock title format from module twin
+        if desired_properties["ClockDateTimeFormat"] is not None:
+            DISPLAY_DRIVER.formatTime = desired_properties["ClockDateTimeFormat"]
+            print("Clock date timae format set as %s" % desired_properties["ClockDateTimeFormat"])
+
+        if desired_properties["Locale"] is not None:
+            print("Setting locale as %s" % desired_properties["Locale"])
+            locale.setlocale(locale.LC_ALL, desired_properties["Locale"])
+
 
 class HubManager(object):
 
