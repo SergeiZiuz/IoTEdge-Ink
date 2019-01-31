@@ -8,6 +8,15 @@ from PIL import Image,ImageDraw,ImageFont
 import traceback
 from datetime import datetime
 
+# VARS
+FORMATTIMEFROMJSON = '%m/%d/%Y %H:%M:%S'
+SCREENTIMEFORMAT = '%H:%M'
+MAXLINELENGTH = 35
+FONT24 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 24)
+FONT30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
+FONT46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
+LOGOPATH = './images/VTB.png'
+
 class DrawingDisplay:
     def __init__(self, roomTitle, formatTime):
         self.roomTitle = roomTitle
@@ -18,7 +27,7 @@ class DrawingDisplay:
         if engagements != []:
             title = engagements[0]["Title"]
             countEngagements = len(engagements)
-            if len(title) <= 35:
+            if len(title) <= MAXLINELENGTH:
                 self.drawOneLineDisplay(countEngagements, engagements)
             else:
                 self.drawTwoLinesDisplay(countEngagements, engagements)
@@ -35,29 +44,25 @@ class DrawingDisplay:
             draw = ImageDraw.Draw(HImage)
 
             # local var
-            font24 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 24)
-            font30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
-            font46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
-            logoPath = './images/VTB.png'
             firstLineTime = ''
             firstLineText = ''
             secondLineTime = ''
             secondLineText = ''
             thirdLineTime = ''
             thirdLineText = ''
-            currentTime = datetime.now().strftime(self.formatTime)
 
             countEngagements = 0
             for engagement in engagements:
-                lt = len(engagement["StartTime"]) - 3
+                startTime = datetime.strptime(engagement["StartTime"], FORMATTIMEFROMJSON)
+                timeEnd = datetime.strptime(engagement["EndTime"], FORMATTIMEFROMJSON)
                 if countEngagements == 0:
-                    firstLineTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
+                    firstLineTime = startTime.strftime(SCREENTIMEFORMAT) + "-" + timeEnd.strftime(SCREENTIMEFORMAT)
                     firstLineText = engagement["Title"]
                 elif countEngagements == 1:
-                    secondLineTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
+                    secondLineTime = startTime.strftime(SCREENTIMEFORMAT) + "-" + timeEnd.strftime(SCREENTIMEFORMAT)
                     secondLineText = engagement["Title"]
                 elif countEngagements == 2:
-                    thirdLineTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
+                    thirdLineTime = startTime.strftime(SCREENTIMEFORMAT) + "-" + timeEnd.strftime(SCREENTIMEFORMAT)
                     thirdLineText = engagement["Title"]
                 else:
                     print(engagement["Title"])
@@ -79,20 +84,20 @@ class DrawingDisplay:
             draw.line((155, 94, 155, 290), fill = 0)
 
             # Draw logo
-            png = Image.open(logoPath)
+            png = Image.open(LOGOPATH)
             HImage.paste(png, (520, 20))
 
             # Draw title room
-            draw.text((200, 30), self.roomTitle, font = font30, fill = 0)
+            draw.text((200, 30), self.roomTitle, font = FONT30, fill = 0)
 
             # Draw schedule
-            draw.text((5, 110), firstLineTime, font = font24, fill = 0)
-            draw.text((170, 110), firstLineText, font = font24, fill = 0)
-            draw.text((5, 174), secondLineTime, font = font24, fill = 0)
-            draw.text((170, 174), secondLineText, font = font24, fill = 0)
-            draw.text((5, 238), thirdLineTime, font = font24, fill = 0)
-            draw.text((170, 238), thirdLineText, font = font24, fill = 0)
-            draw.text((5, 305), currentTime, font = font46, fill = 0)
+            draw.text((5, 110), firstLineTime, font = FONT24, fill = 0)
+            draw.text((170, 110), firstLineText, font = FONT24, fill = 0)
+            draw.text((5, 174), secondLineTime, font = FONT24, fill = 0)
+            draw.text((170, 174), secondLineText, font = FONT24, fill = 0)
+            draw.text((5, 238), thirdLineTime, font = FONT24, fill = 0)
+            draw.text((170, 238), thirdLineText, font = FONT24, fill = 0)
+            draw.text((5, 305), datetime.now().strftime(self.formatTime), font = FONT46, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
             time.sleep(2)
@@ -103,16 +108,16 @@ class DrawingDisplay:
 
     def separatingAtTwoLines(self, engagement):
         lengthEngagementTitle = len(engagement["Title"])
-        if engagement["Title"][35] != ' ':
-            for count in range(1, 35):
-                nc = 35 - count
+        if engagement["Title"][MAXLINELENGTH] != ' ':
+            for count in range(1, MAXLINELENGTH):
+                nc = MAXLINELENGTH - count
                 if engagement["Title"][nc] == ' ':
                     firstStLineColon = engagement["Title"][0:nc]
                     secondStLineColon = engagement["Title"][nc+1:lengthEngagementTitle]
                     break
         else:
-            firstStLineColon = engagement["Title"][0:35]
-            secondStLineColon = engagement["Title"][36:lengthEngagementTitle]
+            firstStLineColon = engagement["Title"][0:MAXLINELENGTH]
+            secondStLineColon = engagement["Title"][MAXLINELENGTH + 1:lengthEngagementTitle]
         rowLines = {"FirstLine": firstStLineColon, "SecondLine": secondStLineColon}
         return (rowLines)
 
@@ -126,10 +131,6 @@ class DrawingDisplay:
             draw = ImageDraw.Draw(HImage)
 
             # Local vars
-            font24 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 24)
-            font30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
-            font46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
-            logoPath = './images/VTB.png'
             firstRowTime = ''
             firstRowOneLineText = ''
             firstRowTwoLineText = ''
@@ -137,20 +138,20 @@ class DrawingDisplay:
             secondRowOneLineText = ''
             secondRowTwoLineText = ''
             secondRowCenterLineText = ''
-            currentTime = datetime.now().strftime(self.formatTime)
             
             # Set local vars
             countEngagements = 0
             for engagement in engagements:
-                lt = len(engagement["StartTime"]) - 3
+                startTime = datetime.strptime(engagement["StartTime"], FORMATTIMEFROMJSON)
+                timeEnd = datetime.strptime(engagement["EndTime"], FORMATTIMEFROMJSON)
                 if countEngagements == 0:
-                    firstRowTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
+                    firstRowTime = startTime.strftime(SCREENTIMEFORMAT) + "-" + timeEnd.strftime(SCREENTIMEFORMAT)
                     firstRowOneLineText = self.separatingAtTwoLines(engagement)["FirstLine"]
                     firstRowTwoLineText = self.separatingAtTwoLines(engagement)["SecondLine"]
                 elif countEngagements == 1:
-                    secondRowTime = engagement["StartTime"][11:lt] + "-" + engagement["EndTime"][11:lt]
+                    secondRowTime = startTime.strftime(SCREENTIMEFORMAT) + "-" + timeEnd.strftime(SCREENTIMEFORMAT)
                     lengthEngagementTitle = len(engagement["Title"])
-                    if lengthEngagementTitle > 35:
+                    if lengthEngagementTitle > MAXLINELENGTH:
                         secondRowOneLineText = self.separatingAtTwoLines(engagement)["FirstLine"]
                         secondRowTwoLineText = self.separatingAtTwoLines(engagement)["SecondLine"]
                     else:
@@ -174,21 +175,21 @@ class DrawingDisplay:
             draw.line((155, 94, 155, 290), fill = 0)
 
             # Draw logo
-            png = Image.open(logoPath)
+            png = Image.open(LOGOPATH)
             HImage.paste(png, (520, 20))
 
             # Draw title room
-            draw.text((200, 30), self.roomTitle, font = font30, fill = 0)
+            draw.text((200, 30), self.roomTitle, font = FONT30, fill = 0)
 
             # Draw schedule
-            draw.text((5, 130), firstRowTime, font = font24, fill = 0)
-            draw.text((170, 110), firstRowOneLineText, font = font24, fill = 0)
-            draw.text((170, 145), firstRowTwoLineText, font = font24, fill=0)
-            draw.text((5, 226), secondRowTime, font = font24, fill = 0)
-            draw.text((170, 206), secondRowOneLineText, font = font24, fill = 0)
-            draw.text((170, 241), secondRowTwoLineText, font = font24, fill = 0)
-            draw.text((170, 226), secondRowCenterLineText, font = font24, fill=0)
-            draw.text((5, 305), currentTime, font = font46, fill = 0)
+            draw.text((5, 130), firstRowTime, font = FONT24, fill = 0)
+            draw.text((170, 110), firstRowOneLineText, font = FONT24, fill = 0)
+            draw.text((170, 145), firstRowTwoLineText, font = FONT24, fill=0)
+            draw.text((5, 226), secondRowTime, font = FONT24, fill = 0)
+            draw.text((170, 206), secondRowOneLineText, font = FONT24, fill = 0)
+            draw.text((170, 241), secondRowTwoLineText, font = FONT24, fill = 0)
+            draw.text((170, 226), secondRowCenterLineText, font = FONT24, fill=0)
+            draw.text((5, 305), datetime.now().strftime(self.formatTime), font = FONT46, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
             time.sleep(2)
@@ -206,12 +207,6 @@ class DrawingDisplay:
             HImage = Image.new('1', (epd7in5.EPD_WIDTH, epd7in5.EPD_HEIGHT), 255) # 255: Clear the frame
             draw = ImageDraw.Draw(HImage)
 
-            # Local var
-            font30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
-            font46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
-            logoPath = './images/VTB.png'
-            currentTime = datetime.now().strftime(self.formatTime)
-
             # Draw frame
             draw.line((0, 90, 640, 90), fill = 0)
             draw.line((0, 91, 640, 91), fill = 0)
@@ -225,12 +220,12 @@ class DrawingDisplay:
             draw.line((0, 290, 640, 290), fill = 0)
 
             # Draw logo
-            png = Image.open(logoPath)
+            png = Image.open(LOGOPATH)
             HImage.paste(png, (520, 20))
 
             # Draw title room
-            draw.text((200, 30), self.roomTitle, font = font30, fill = 0)
-            draw.text((5, 305), currentTime, font = font46, fill = 0)
+            draw.text((200, 30), self.roomTitle, font = FONT30, fill = 0)
+            draw.text((5, 305), datetime.now().strftime(self.formatTime), font = FONT46, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
             time.sleep(2)
