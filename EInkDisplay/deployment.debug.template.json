@@ -138,6 +138,7 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "Title":"Александровский сад",
+        "DateTimeFormat": "dd/MM/yyyy HH:mm",
         "IconTopUrl": "",
         "IconBottomUrl": "",
         "VideoUrl": ""
@@ -149,7 +150,10 @@
         "Transport": "ServiceBus",
         "ConnectionString":"$SERVICEBUS_CONNECTION_STRING",
         "Topic": "$SERVICEBUS_TOPIC_NAME",
-        "Subscription": "$SERVICEBUS_SUBSCRIPTION_NAME"
+        "Subscription": "$SERVICEBUS_SUBSCRIPTION_NAME",
+        "DateTimeFormat": "dd/MM/yyyy HH:mm",
+        "CheckConnectionInterval": 1000,
+        "eventsExpiration": 1900
     }
   }
   }

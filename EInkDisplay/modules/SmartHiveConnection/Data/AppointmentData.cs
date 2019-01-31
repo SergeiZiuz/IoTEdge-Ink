@@ -9,7 +9,7 @@ using Newtonsoft.Json.Schema;
 namespace SmartHive.Common.Data
 {
     public class ScheduleData
-    {
+    {        
         public string RoomId { get; set; }
         public Appointment[] Schedule { get; set; }
     }

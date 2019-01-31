@@ -1,5 +1,7 @@
 FROM resin/raspberrypi3-debian:stretch
 
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /app
 
 RUN apt-get update && \

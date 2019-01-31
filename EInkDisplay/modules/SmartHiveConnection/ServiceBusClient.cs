@@ -1,13 +1,16 @@
 using System;
     using System.IO;
     using System.Text;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using IoT = Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Shared;
+    using System.Collections.Generic;
     using Newtonsoft.Json;
     using SmartHive.Common.Data;
+    using System.Globalization;
 
 namespace SmartHiveConnection
 {    
@@ -17,7 +20,7 @@ namespace SmartHiveConnection
             private static ServiceBusClientModel clientModel = null;           
             private static ISubscriptionClient  subscriptionClient = null;
             internal static IoT.ModuleClient ioTHubModuleClient {get ; private set;}
-            private const int CheckConnectionInterval = 1000;
+
           //  private bool IsRunning = true;
             private ServiceBusClient(){
                 
@@ -57,56 +60,51 @@ namespace SmartHiveConnection
                 }
             
 
-  /*           private async Task Start(){
-                    this.IsRunning = true;
-                    await Task.Factory.StartNew(async()=> {
-                               while (this.IsRunning)
-                                {
-                                    //Check connection state
-                                    if (ServiceBusClient.subscriptionClient.IsClosedOrClosing){
-                                        Console.WriteLine("Error: Service bus connection closed!");
-                                    }else{
-                                        //Debug message generation
-                                       string TestMessage = "{\"RoomId\": \"Conf Room MTC Msc Alexander Garden_26\",\"Schedule\": [{\"StartTime\": \"01/24/2019 10:30:00\",\"EndTime\": \"01/24/2019 13:30:00\",\"Location\": \"Conf Room MTC Msc Alexander Garden_26\",\"Title\": \"MTC Moscow (Russia) MS Day for Tupolev | Veronika Muravitskaya \",      \"Category\": \"\",\"MeetingExternalLink\": null},{\"StartTime\": \"01/24/2019 19:30:00\",\"EndTime\": \"01/24/2019 20:30:00\",\"Location\": \"Conf Room MTC Msc Alexander Garden_26\",\"Title\": \"MTC Moscow (Russia) Тестовое мероприятие\",\"Category\": \"\",\"MeetingExternalLink\": null}]}";
-                                       Message message = new Message(Encoding.UTF8.GetBytes(TestMessage));
-                                       await ProcessMessagesAsync(message, new CancellationToken());
-                                    }
-                                    await Task.Delay(CheckConnectionInterval);
-                                }
-
-                                await Stop();
-                    });
-            }*/
-
             static async Task ProcessMessagesAsync(Message message, CancellationToken token)
             {
-                string msgBody = Encoding.UTF8.GetString(message.Body);
-                if (string.IsNullOrEmpty(msgBody)){
-                    throw new ArgumentNullException("Message body is null or empty");
-                }
-               
+                try{
+                    string msgBody = Encoding.UTF8.GetString(message.Body);
+                    if (string.IsNullOrEmpty(msgBody)){
+                        throw new ArgumentNullException("Message body is null or empty");
+                    }
+                
 
-                    byte[] messageBytes = Encoding.UTF8.GetBytes(msgBody);
-                    IoT.Message  pipeMessage =  new IoT.Message(messageBytes);
-                //  Check if this is a schedule notification
-                string timestamp = DateTime.Now.ToString("dd/MM/yy hh:mm:ss");
-                if (ScheduleUpdateEventSchema.IsValid(msgBody)){
-                    await ioTHubModuleClient.SendEventAsync("ScheduleOutput", pipeMessage);
-                    Console.WriteLine($"{timestamp} sucessfully handling ScheduleOutput message {msgBody}");
-                 // Check if this is sensort notification
-                }else if (NotificationEventSchema.IsValid(msgBody))
-                {                    
-                    await ioTHubModuleClient.SendEventAsync("SensorsOutput", pipeMessage);
-                    Console.WriteLine($"{timestamp} sucessfully handling SensorsOutput message {msgBody}");
-                }else{
-                     // Process the message
-                    Console.WriteLine($"Unknown message format: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{msgBody}");
-                    throw new ArgumentException("Unknown message format");
-                }
+                       
+                    //  Check if this is a schedule notification
+                    string timestamp = DateTime.Now.ToString("dd/MM/yy hh:mm:ss");
+                    if (ScheduleUpdateEventSchema.IsValid(msgBody)){
+                        
+                        ScheduleData eventData = JsonConvert.DeserializeObject<ScheduleData>(msgBody);
+                            // Remove expired events
+                        eventData.Schedule = ServiceBusClient.FilterAppointments(eventData);                
 
-                // Complete the message so that it is not received again.
-                // This can be done only if the subscriptionClient is opened in ReceiveMode.PeekLock mode (which is default).
-                await subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
+                        msgBody = JsonConvert.SerializeObject(eventData);
+
+                        byte[] messageBytes = Encoding.UTF8.GetBytes(msgBody);
+
+                        IoT.Message  pipeMessage =  new IoT.Message(messageBytes);
+
+                        await ioTHubModuleClient.SendEventAsync("ScheduleOutput", pipeMessage);
+                        Console.WriteLine($"{timestamp} sucessfully handling ScheduleOutput message as {msgBody}");
+                    // Check if this is sensort notification
+                    }else if (NotificationEventSchema.IsValid(msgBody))
+                    {   
+                        
+                        //TODO: process events from sensors
+                        //await ioTHubModuleClient.SendEventAsync("SensorsOutput", pipeMessage);
+                        Console.WriteLine($"{timestamp} sucessfully handling SensorsOutput message {msgBody}");
+                    }else{
+                        // Process the message
+                        Console.WriteLine($"Unknown message format: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{msgBody}");
+                        throw new ArgumentException("Unknown message format");
+                    }
+                }catch(Exception ex){
+                        Console.WriteLine($"Error processing message: {ex.Message} {ex.StackTrace}");
+                }finally{
+                        // Complete the message so that it is not received again.
+                        // This can be done only if the subscriptionClient is opened in ReceiveMode.PeekLock mode (which is default).
+                        await subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
+                }
             }
 
             //  Handler to look at the exceptions received on the MessagePump
@@ -125,6 +123,25 @@ namespace SmartHiveConnection
                     }
                     
             }
+
+        private static Appointment[] FilterAppointments(ScheduleData eventData)
+        {
+            if (eventData == null || eventData.Schedule == null)
+                return new Appointment[0];
+
+                int inEventsCnt = eventData.Schedule.Count();
+
+                DateTime expirationTime = DateTime.Now.AddSeconds(ServiceBusClient.clientModel.eventsExpiration * -1);
+                //return all engagements  and not finished yet or finished not leater then eventsExpiration minutes
+                Appointment[] retVal = eventData.Schedule.Where<Appointment>(a => 
+                        expirationTime.CompareTo(DateTime.ParseExact(a.EndTime, ServiceBusClient.clientModel.DateTimeFormat, CultureInfo.InvariantCulture)) <= 0).ToArray<Appointment>();
+
+                int outEventsCnt = retVal.Count();
+
+                Console.WriteLine($"Filtered { inEventsCnt  - outEventsCnt} from {inEventsCnt} input events.\n Event removed after {ServiceBusClient.clientModel.eventsExpiration} seconds\n");
+
+                return retVal;        
+        }
     }
     
 
@@ -133,6 +150,12 @@ namespace SmartHiveConnection
         public string ConnectionString  {get; set;}
         public string Topic {get; set;}
         public string Subscription {get; set;}
+        public string DateTimeFormat {get; set; } = @"dd\/MM\/yyyy HH:mm";
+        
+        public int  CheckConnectionInterval {get; set;} =1000;
+
+        /** If event finished it will be removed from display after this period of time  */
+        public int  eventsExpiration {get; set;} =5*60*60;
 
         public static ServiceBusClientModel InitClientModel(TwinCollection settings){
             
