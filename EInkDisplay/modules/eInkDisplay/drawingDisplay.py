@@ -88,7 +88,7 @@ class DrawingDisplay:
             HImage.paste(png, (520, 20))
 
             # Draw title room
-            draw.text((200, 30), self.roomTitle, font = FONT30, fill = 0)
+            draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
 
             # Draw schedule
             draw.text((5, 110), firstLineTime, font = FONT24, fill = 0)
@@ -179,7 +179,7 @@ class DrawingDisplay:
             HImage.paste(png, (520, 20))
 
             # Draw title room
-            draw.text((200, 30), self.roomTitle, font = FONT30, fill = 0)
+            draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
 
             # Draw schedule
             draw.text((5, 130), firstRowTime, font = FONT24, fill = 0)
@@ -224,7 +224,9 @@ class DrawingDisplay:
             HImage.paste(png, (520, 20))
 
             # Draw title room
-            draw.text((200, 30), self.roomTitle, font = FONT30, fill = 0)
+            draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
+
+            # Draw time
             draw.text((5, 305), datetime.now().strftime(self.formatTime), font = FONT46, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
