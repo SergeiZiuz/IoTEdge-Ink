@@ -34,6 +34,29 @@ class DrawingDisplay:
         else:
             self.drawDisplayWithoutEngagements()
 
+    def titleDrawDisplay(self, roomTitle):
+        try:
+            epd = epd7in5.EPD()
+            epd.init()
+            epd.Clear(0xFF)
+
+            titleImage = Image.new('1', (epd7in5.EPD_WIDTH, epd7in5.EPD_HEIGHT), 255) # 255: Clear the frame
+            draw = ImageDraw.Draw(titleImage)
+
+            # Draw logo
+            png = Image.open(LOGOPATH)
+            HImage.paste(png, (520, 20))
+
+            # Draw title room
+            draw.text((200, 30), self.roomTitle, font = FONT30, fill = 0)
+
+            epd.display(epd.getbuffer(HImage))
+            time.sleep(2)
+            epd.sleep()
+        except:
+            print('traceback.format_exc():\n%s', traceback.format_exc())
+            exit()
+
     def drawOneLineDisplay(self, countEngagements, engagements):
         try:
             epd = epd7in5.EPD()

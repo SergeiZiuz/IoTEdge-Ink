@@ -123,6 +123,7 @@ class EPD:
     def wait_until_idle(self):
         while(epdconfig.digital_read(self.busy_pin) == 0):      # 0: idle, 1: busy
             epdconfig.delay_ms(100)
+        print("e-Paper busy release")
         
     def init(self):
         if (epdconfig.module_init() != 0):
