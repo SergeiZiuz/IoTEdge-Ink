@@ -44,7 +44,19 @@ def receive_schedule_message_callback(message, hubManager):
     except Exception as err:
         print("Error parsing json string %s\n" % err)
         print ( "<<<%s>>> & Size=%d\n" % (message_text, size) )
+
+def receive_sensor_notification_callback(message, hubManager):
+    try:
+        message_buffer = message.get_bytearray()
+        size = len(message_buffer)
+        message_text = message_buffer[:size].decode('utf8')
         
+        sensors_data = json.loads(message_text)
+
+        
+    except Exception as err:
+        print("Error parsing json string %s\n" % err)
+        print ( "<<<%s>>> & Size=%d\n" % (message_text, size))
 
 # module_twin_callback is invoked when the module twin's desired properties are updated.
 def module_twin_callback(update_state, payload, user_context):
@@ -91,7 +103,7 @@ class HubManager(object):
         self.client.set_message_callback("ScheduleInput", receive_schedule_message_callback, self)
         
         # sets the callback when a message arrives on "SensorsOutputInput" queue.  
-        #self.client.set_message_callback("SensorsInput", receive_sensor_notification_callback, self)
+        self.client.set_message_callback("SensorsInput", receive_sensor_notification_callback, self)
         print("Initialization done.\n")
 
     # Forwards the message received onto the next stage in the process.
