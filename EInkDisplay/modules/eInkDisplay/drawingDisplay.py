@@ -17,7 +17,7 @@ FONT30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
 FONT46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
 LOGOPATH = './images/VTB.png'
 BUSYPATH = './images/LogoBusy.bmp'
-FREEPATH = ''
+FREEPATH = './images/LogoFree.bmp'
 SENSOR = ''
 TEMPERATURE = ''
 HUMIDITY = ''
@@ -44,11 +44,11 @@ class DrawingDisplay:
         for sensor in sensors:
             if sensor["DeviceId"] == DEVICEID:
                 if sensor["ValueLabel"] == 'Sensor':
-                    SENSOR = sensor["Value"]
+                    self.SENSOR = sensor["Value"]
                 elif sensor["ValueLabel"] == 'Temperature':
-                    TEMPERATURE = sensor["Value"]
+                    self.TEMPERATURE = sensor["Value"]
                 elif sensor["ValueLabel"] == 'Relative Humidity':
-                    HUMIDITY = sensor["Value"]
+                    self.HUMIDITY = sensor["Value"]
         
 
     def drawOneLineDisplay(self, countEngagements, engagements):

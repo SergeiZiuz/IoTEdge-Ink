@@ -20,7 +20,7 @@ sensors = [
 ]
 
 
-display.
+display.drawRoomSensors(sensors)
 display.drawDisplay(roomSchedule)
 #display.drawTwoLinesDisplay()
 
