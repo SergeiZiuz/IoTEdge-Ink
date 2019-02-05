@@ -12,21 +12,27 @@ from datetime import datetime
 FORMATTIMEFROMJSON = '%d/%m/%Y %H:%M'
 SCREENTIMEFORMAT = '%H:%M'
 MAXLINELENGTH = 35
+FONT18 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 18)
 FONT24 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 24)
 FONT30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
 FONT46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
 LOGOPATH = './images/VTB.png'
 BUSYPATH = './images/LogoBusy.bmp'
 FREEPATH = './images/LogoFree.bmp'
-SENSOR = ''
-TEMPERATURE = ''
-HUMIDITY = ''
-DEVICEID = '4_3242289432'
+# SENSOR = ''
+# TEMPERATURE = ''
+# HUMIDITY = ''
+# DEVICEID = '4_3242289432'
 
 class DrawingDisplay:
     def __init__(self, roomTitle, formatTime):
         self.roomTitle = roomTitle
         self.formatTime = formatTime
+        self.sensor = ''
+        self.temperature = ''
+        self.humidity = ''
+        self.deviceID = '4_3242289432'
+        
 
     def drawDisplay(self, engagements):
         print("Engagements", engagements)
@@ -42,13 +48,19 @@ class DrawingDisplay:
 
     def drawRoomSensors(self, sensors):
         for sensor in sensors:
-            if sensor["DeviceId"] == DEVICEID:
+            print("DeviceID", sensor["DeviceId"])
+            if sensor["DeviceId"] == self.deviceID:
+                print("Sensor", sensor["ValueLabel"])
                 if sensor["ValueLabel"] == 'Sensor':
-                    self.SENSOR = sensor["Value"]
+                    self.sensor = sensor["Value"]
+                    print('Sensor',sensor["Value"])
                 elif sensor["ValueLabel"] == 'Temperature':
-                    self.TEMPERATURE = sensor["Value"]
+                    self.temperature = sensor["Value"]
+                    print('Temperature', sensor["Value"])
                 elif sensor["ValueLabel"] == 'Relative Humidity':
-                    self.HUMIDITY = sensor["Value"]
+                    self.humidity = sensor["Value"]
+                    print('Humidity', sensor["Value"])
+        print(self.sensor, self.temperature, self.humidity)
         
 
     def drawOneLineDisplay(self, countEngagements, engagements):
@@ -105,10 +117,12 @@ class DrawingDisplay:
             HImage.paste(png, (520, 20))
             busyLogo = Image.open(BUSYPATH)
             freeLogo = Image.open(FREEPATH)
-            if SENSOR == 'True':
-                HImage.paste(busyLogo, (520, 290))
+            if self.sensor == 'True':
+                HImage.paste(busyLogo, (530, 300))
             else:
-                HImage.paste(freeLogo, (520, 290))
+                HImage.paste(freeLogo, (530, 300))
+                draw.text((540, 305), 'Свободно', font = FONT18, fill = 0)
+
 
             # Draw title room
             draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
@@ -121,8 +135,8 @@ class DrawingDisplay:
             draw.text((5, 238), thirdLineTime, font = FONT24, fill = 0)
             draw.text((170, 238), thirdLineText, font = FONT24, fill = 0)
             draw.text((5, 305), datetime.now().strftime(self.formatTime), font = FONT46, fill = 0)
-            draw.text((445, 332), ('t ' + TEMPERATURE + ' C'), font = FONT24, fill = 0)
-            draw.text((445, 358), ('h ' + HUMIDITY + ' %'), font = FONT24, fill = 0)
+            draw.text((440, 310), 't ' + str(self.temperature) + ' C', font = FONT24, fill = 0)
+            draw.text((440, 340), 'h ' + str(self.humidity) + ' %', font = FONT24, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
             time.sleep(2)
@@ -163,8 +177,7 @@ class DrawingDisplay:
             secondRowOneLineText = ''
             secondRowTwoLineText = ''
             secondRowCenterLineText = ''
-            temperature = 't ' + self.sensors["Temperature"] + ' C'
-            humidity = 'h ' + self.sensors["Humidity"] + ' %'
+            # temperature = 't ' + str(self.temperature) + ' C'
             
             # Set local vars
             countEngagements = 0
@@ -206,10 +219,11 @@ class DrawingDisplay:
             HImage.paste(png, (520, 20))
             busyLogo = Image.open(BUSYPATH)
             freeLogo = Image.open(FREEPATH)
-            if self.sensors["Sensor"] == 1:
-                HImage.paste(busyLogo, (520, 290))
-            elif self.sensors["Sensor"] == 0:
-                HImage.paste(freeLogo, (520, 290))
+            if self.sensor == 'True':
+                HImage.paste(busyLogo, (530, 300))
+            else:
+                HImage.paste(freeLogo, (530, 300))
+                draw.text((540, 305), 'Свободно', font = FONT18, fill = 0)
 
             # Draw title room
             draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
@@ -223,8 +237,8 @@ class DrawingDisplay:
             draw.text((170, 241), secondRowTwoLineText, font = FONT24, fill = 0)
             draw.text((170, 226), secondRowCenterLineText, font = FONT24, fill=0)
             draw.text((5, 305), datetime.now().strftime(self.formatTime), font = FONT46, fill = 0)
-            draw.text((445, 332), temperature, font = FONT24, fill = 0)
-            draw.text((445, 358), humidity, font = FONT24, fill = 0)
+            draw.text((440, 310), 't ' + str(self.temperature) + ' C', font = FONT24, fill = 0)
+            draw.text((440, 340), 'h ' + str(self.humidity) + ' %', font = FONT24, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
             time.sleep(2)
@@ -259,10 +273,11 @@ class DrawingDisplay:
             HImage.paste(png, (520, 20))
             busyLogo = Image.open(BUSYPATH)
             freeLogo = Image.open(FREEPATH)
-            if self.sensors["Sensor"] == 1:
-                HImage.paste(busyLogo, (520, 290))
-            elif self.sensors["Sensor"] == 0:
-                HImage.paste(freeLogo, (520, 290))
+            if self.sensor == 'True':
+                HImage.paste(busyLogo, (530, 300))
+            else:
+                HImage.paste(freeLogo, (530, 300))
+                draw.text((540, 305), 'Свободно', font = FONT18, fill = 0)
 
             # Draw title room
             draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
@@ -271,10 +286,8 @@ class DrawingDisplay:
             draw.text((5, 305), datetime.now().strftime(self.formatTime), font = FONT46, fill = 0)
 
             # Draw sensors
-            temperature = 't ' + self.sensors["Temperature"] + ' C'
-            humidity = 'h ' + self.sensors["Humidity"] + ' %'
-            draw.text((445, 332), temperature, font = FONT24, fill = 0)
-            draw.text((445, 358), humidity, font = FONT24, fill = 0)
+            draw.text((440, 310), 't ' + str(self.temperature) + ' C', font = FONT24, fill = 0)
+            draw.text((440, 340), 'h ' + str(self.humidity) + ' %', font = FONT24, fill = 0)
 
             epd.display(epd.getbuffer(HImage))
             time.sleep(2)

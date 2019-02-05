@@ -51,7 +51,7 @@ def receive_sensor_notification_callback(message, hubManager):
         size = len(message_buffer)
         message_text = message_buffer[:size].decode('utf8')
         
-        sensors_data = json.loads(message_text)
+        DISPLAY_DRIVER.drawRoomSensors(json.loads(message_text))
 
         
     except Exception as err:
