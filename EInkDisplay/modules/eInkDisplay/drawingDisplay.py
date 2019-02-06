@@ -16,6 +16,7 @@ FONT24 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 24)
 FONT30 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 30)
 FONT46 = ImageFont.truetype('./fonts/wqy-microhei.ttc', 46)
 LOGOPATH = './images/VTB.png'
+STATEPATH = './images/state.png'
 
 class DrawingDisplay:
     def __init__(self, roomTitle, formatTime):
@@ -86,6 +87,8 @@ class DrawingDisplay:
             # Draw logo
             png = Image.open(LOGOPATH)
             HImage.paste(png, (520, 20))
+            pngSt = Image.open(STATEPATH)
+            HImage.paste(pngSt, (520, 320))
 
             # Draw title room
             draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
@@ -177,6 +180,9 @@ class DrawingDisplay:
             # Draw logo
             png = Image.open(LOGOPATH)
             HImage.paste(png, (520, 20))
+            pngSt = Image.open(STATEPATH)
+            HImage.paste(pngSt, (425, 300))
+
 
             # Draw title room
             draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
@@ -222,6 +228,8 @@ class DrawingDisplay:
             # Draw logo
             png = Image.open(LOGOPATH)
             HImage.paste(png, (520, 20))
+            pngSt = Image.open(STATEPATH)
+            HImage.paste(pngSt, (520, 320))
 
             # Draw title room
             draw.text((20, 30), self.roomTitle, font = FONT30, fill = 0)
